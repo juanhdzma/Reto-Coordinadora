@@ -1,0 +1,376 @@
+/*
+ * To change this template, choose Tools | Templates
+ * and open the template in the editor.
+ */
+
+//variables globales
+
+
+var source;
+var source_paq;
+var source_doc;
+var template;
+var template_paq;
+var template_doc;
+var map;
+var qtipapi;
+var mapbounds = true;
+
+jQuery(document).ready(function() {
+
+     jQuery(document).on("click","#loginFB",function(event){
+
+        event.preventDefault();
+        login_facebook();
+    });
+
+    jQuery("#loginFB,#loginFB2").click(function(event){
+
+        event.preventDefault();
+        login_facebook();
+    });
+
+    jQuery('.menu-top-menu-container ul li:nth-child(1) a').on('click', function(event) {
+        event.preventDefault();
+        // jQuery('#coordinadora_login_form').toggle();
+
+    });
+
+    jQuery("#modal-close").click(function(event){
+        console.log(jQuery("#myModal")[0]);
+       jQuery("#myModal")[0].style.display = "none";
+    });
+
+
+   var loginTooltip= jQuery('#coor-lnk-menu-usuario').qtip({
+        show: 'click',
+        hide: 'click',
+        content: {
+            text: jQuery("#coor-user-info-options").html(),
+            button: 'Close'
+        },
+        position: {
+            my: 'top center', // Position my top left...
+            at: 'bottom center'
+        }
+    });
+
+    qtipapi = loginTooltip.qtip('api');
+
+    jQuery('.item-aliados a').qtip({
+        show: 'click',
+        hide: 'click',
+        content: {
+            text: jQuery("#aliadosCont").html(),
+            button: 'Close'
+        },
+        position: {
+            my: 'top center', // Position my top left...
+            at: 'bottom center'
+        }
+    });
+          //  initialLocation2 = new google.maps.LatLng(6.25728461,-75.57529449);
+          //  jQuery('#map_canvas').gmap({ 'center': initialLocation2  });
+          //     mapbounds = false;
+          //       loadpoints();
+          //
+          //   if(navigator.geolocation) {
+          //
+          //     var t=navigator.geolocation.getCurrentPosition(function(position) {
+          //         mapbounds = false;
+          //         initialLocation = new google.maps.LatLng(position.coords.latitude,position.coords.longitude);
+          //         jQuery('#map_canvas').gmap({ 'center': initialLocation  });
+          //         jQuery('#map_canvas').gmap('option', 'zoom', 11);
+          //         loadpoints();
+          //     }, function() {
+          //           mapbounds = true;
+          //           loadpoints();
+          //       });
+           //
+          //   }
+          //   // Browser doesn't support Geolocation
+          //   else {
+           //
+          //       mapbounds = true;
+          //       loadpoints();
+          //   }
+
+});
+
+
+    /*function closeModal(){
+      jQuery("#modal-retrasos").removeClass('active');
+      jQuery("#overlay").removeClass('active');
+      jQuery("#slider-home #accordeon-servicios").css('z-index','999');
+      jQuery("#aliados-home").css('z-index','600');
+    }*/
+
+
+
+       function loadpoints(){
+       if (jQuery("#map_canvas").length > 0) {
+        jQuery('#map_canvas').gmap().bind('init', function() {
+
+
+            // This URL won't work on your localhost, so you need to change it
+            // see http://en.wikipedia.org/wiki/Same_origin_policy
+            var markerimg = 'http://www.coordinadora.com/wp-content/uploads/coordinadora-map-marker.png';
+            jQuery.getJSON('http://www.coordinadora.com/wp-content/uploads/markers.json', function(data) {
+                jQuery.each(data.markers, function(i, marker) {
+                    jQuery('#map_canvas').gmap('addMarker', {
+                        'position': new google.maps.LatLng(marker.latitude, marker.longitude),
+                        'bounds': mapbounds,
+                        'icon': markerimg
+                    }).click(function() {
+                        var htmlContent = '<div>';
+                        htmlContent += '<strong style="color:#0072BC;">' + marker.name + '</strong><br />';
+                        htmlContent += 'Dirección:' + marker.direccion + '<br />';
+                        htmlContent += 'Teléfono:' + marker.telefono + '<br />';
+                        htmlContent += '</div>';
+                        jQuery('#map_canvas').gmap('openInfoWindow', {'content': htmlContent}, this);
+                    });
+                });
+            }).done(function() {
+
+                });
+
+
+        });
+
+
+    }
+       }
+
+/**
+ *
+ * @param {array} opciones
+ * @returns {html}
+ */
+
+function get_ciudades_by_dpto(opciones) {
+    var templateData = '';
+    var asynchronous;
+    var origen='';
+    if (typeof opciones.async != 'undefined') {
+        asynchronous=opciones.async;
+    }else{
+        asynchronous=true;
+    }
+
+    if (typeof opciones.origen != 'undefined') {
+        origen=opciones.origen;
+    }else{
+        origen="1";
+    }
+
+
+    jQuery.ajax({
+        dataType: 'json',
+        type: 'POST',
+        url: opciones.ajaxurl,
+        async: opciones.async,
+        data: {action: 'coor_ajax', functionaction: 'get_ciudades', token: opciones.token, cod_dpto: opciones.dpto,tipo:origen},
+        beforeSend: function( jqXHR) {
+            jQuery(opciones.loader).show();
+        },
+        success: function(response) {
+            jQuery(opciones.loader).hide();
+            var $ciudades = response;
+            var ciudades = [];
+            for (var i in $ciudades) {
+                ciudades.push({codigo: $ciudades[i].codigo, nombre: $ciudades[i].nombre});
+            }
+            templateData = {
+                ciudades: ciudades
+            };
+           opciones.container.html(opciones.handletemplate(templateData));
+        }
+
+    });
+}
+
+
+function coordinadora_display_msg(tipo, mensaje, $contenedor) {
+    var $tipo_class = '';
+    var html='';
+    switch (tipo) {
+        case 'info':
+            $tipo_class = 'icon_coor_info';
+            break;
+        case 'warning':
+            $tipo_class = 'icon_coor_warning';
+            break;
+        case 'error':
+            $tipo_class = 'icon_coor_error';
+            break;
+        case 'success':
+            $tipo_class = 'icon_coor_success';
+            break;
+        default:
+            break;
+    }
+    html='<div class="coor_panel">';
+    html+='<div class="coor_msg coor_msg_'+tipo+'" >';
+    html+='<div class="'+$tipo_class+'"></div>';
+    html+='<div class="coor_alert_msg">'+mensaje+'</div>';
+    html+='</div>';
+    html+='</div>';
+
+    $contenedor.html(html);
+}
+
+// This is called with the results from from FB.getLoginStatus().
+  function statusChangeCallback(response) {
+
+
+    // The response object is returned with a status field that lets the
+    // app know the current login status of the person.
+    // Full docs on the response object can be found in the documentation
+    // for FB.getLoginStatus().
+    if (response.status === 'connected') {
+      var atoken='9278bbf5-8fb4-40f0-b087-d31573946795'; // Logged into your app and Facebook.
+      doLogin(atoken);
+
+    } else if (response.status === 'not_authorized') {
+      // The person is logged into Facebook, but not your app.
+      document.getElementById('status').innerHTML = 'Please log ' +
+        'into this app.';
+    } else {
+      // The person is not logged into Facebook, so we're not sure if
+      // they are logged into this app or not.
+     // document.getElementById('status').innerHTML = 'Please log ' +
+     //   'into Facebook.';
+
+    }
+  }
+
+  // This function is called when someone finishes with the Login
+  // Button.  See the onlogin handler attached to it in the sample
+  // code below.
+  function checkLoginState() {
+    FB.getLoginStatus(function(response) {
+
+      statusChangeCallback(response);
+    });
+  }
+
+window.fbAsyncInit = function(){
+  FB.init({
+    appId      : '629375880435122',
+    cookie     : true,  // enable cookies to allow the server to access
+                        // the session
+    xfbml      : true,  // parse social plugins on this page
+    version    : 'v2.1' // use version 2.1
+  });
+
+  // Now that we've initialized the JavaScript SDK, we call
+  // FB.getLoginStatus().  This function gets the state of the
+  // person visiting this page and can return one of three states to
+  // the callback you provide.  They can be:
+  //
+  // 1. Logged into your app ('connected')
+  // 2. Logged into Facebook, but not your app ('not_authorized')
+  // 3. Not logged into Facebook and can't tell if they are logged into
+  //    your app or not.
+  //
+  // These three cases are handled in the callback function.
+};
+
+function login_facebook(){
+
+  FB.login(function(response){
+       statusChangeCallback(response);
+     });
+}
+
+  // Load the SDK asynchronously
+  (function(d, s, id) {
+    var js, fjs = d.getElementsByTagName(s)[0];
+    if (d.getElementById(id)) return;
+    js = d.createElement(s); js.id = id;
+    js.src = "//connect.facebook.net/en_US/sdk.js";
+    fjs.parentNode.insertBefore(js, fjs);
+  }(document, 'script', 'facebook-jssdk'));
+
+  // Here we run a very simple test of the Graph API after login is
+  // successful.  See statusChangeCallback() for when this call is made.
+  function doLogin(atoken) {
+    FB.api('/me', function(response) {
+
+        coor_fb_login(atoken,response.id,response.first_name,response.last_name,response.email);
+
+
+    });
+  }
+
+
+ function coor_fb_login(atoken, fbid, nombres,apellidos,correo_electronico) {
+
+    jQuery.ajax({
+        dataType: 'json',
+        type: 'POST',
+        url: 'http://www.coordinadora.com/wp-admin/admin-ajax.php',
+        async: false,
+        data: {
+            action: 'coor_ajax',
+            functionaction: 'get_login_facebook',
+            atoken: atoken,
+            fbid: fbid,
+            nombres:nombres,
+            apellidos:apellidos,
+            correo_electronico:correo_electronico
+        },
+        beforeSend: function() {
+            //jQuery(loader_selector).show();
+        },
+        success: function(response) {
+
+              if(response.action === '1'){
+                  location.reload();
+              }
+        },
+        complete: function(jqXHR) {
+            //console.log(jqXHR);
+        }
+    });
+
+}
+
+function logoutFb(){
+    FB.logout(function(response){
+        coor_fb_logut();
+    });
+}
+
+ function coor_fb_logut() {
+
+    jQuery.ajax({
+        dataType: 'json',
+        type: 'POST',
+        url: 'http://www.coordinadora.com/wp-admin/admin-ajax.php',
+        async: false,
+        data: {
+            action: 'coor_ajax',
+            functionaction: 'log_out_facebook'
+        },
+        beforeSend: function() {
+            //jQuery(loader_selector).show();
+        },
+        success: function(response) {
+            if(response.action != '0'){
+                window.location.href=response.action;
+            }
+        },
+        complete: function(jqXHR) {
+
+        }
+    });
+
+}
+
+/*When the user clicks anywhere outside of the modal, close it*/
+window.onclick = function(event) {
+  if (event.target == 'myModal') {
+    jQuery("#myModal")[0].style.display = "none";
+  }
+}

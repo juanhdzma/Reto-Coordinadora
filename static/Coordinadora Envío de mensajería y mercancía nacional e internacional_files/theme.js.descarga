@@ -1,0 +1,95 @@
+/* Copyright (C) YOOtheme GmbH, http://www.gnu.org/licenses/gpl.html GNU/GPL */
+
+jQuery(function($) {
+
+    var config = $('html').data('config') || {};
+
+    // Social buttons
+    $('article[data-permalink]').socialButtons(config);
+
+    ///////////////// FECHA FOOTER
+
+    var d = new Date();
+    var output = d.getFullYear();
+    $('.year-footer').html(output);
+
+    ///////////////// HOME
+
+    ////// SERVICIOS
+
+    $('.tm-top-b .widget_sp_image').hover(inServicios, outServicios);
+
+    function inServicios(e){
+      TweenMax.to($(e.currentTarget).find(".attachment-full"), 0.3, {scale: 0.8});
+      TweenMax.to($(e.currentTarget).find(".leer-mas"), 1, {backgroundColor: "#0072BC"});
+    }
+    function outServicios(e){
+      TweenMax.to($(e.currentTarget).find(".attachment-full"), 0.3, {scale: 1});
+      TweenMax.to($(e.currentTarget).find(".leer-mas"), 1, {backgroundColor: "#48B6DA"});
+    }
+
+    ////// SERVICIOS EN LINEA
+
+    $('.tm-destacados-home .mod_servicios_linea td a').hover(inServiciosLinea, outServiciosLinea);
+
+    function inServiciosLinea(e){
+      TweenMax.to($(e.currentTarget).find("img"), 0.3, {scale: 0.9});
+    }
+    function outServiciosLinea(e){
+      TweenMax.to($(e.currentTarget).find("img"), 0.3, {scale: 1});
+    }
+
+    ////// LEER MAS
+
+    $('.tm-content article .uk-subnav a').hover(inLeerMas, outLeerMas);
+
+    function inLeerMas(e){
+      TweenMax.to($(e.currentTarget), 1, {backgroundColor: "#0072BC"});
+    }
+    function outLeerMas(e){
+      TweenMax.to($(e.currentTarget), 1, {backgroundColor: "#48B6DA"});
+    }
+
+    ////// BOTON AZUL
+
+    $('a.btnAzul').hover(inBtnAzul, outBtnAzul);
+
+    function inBtnAzul(e){
+      TweenMax.to($(e.currentTarget), 1, {backgroundColor: "#0072BC"});
+    }
+    function outBtnAzul(e){
+      TweenMax.to($(e.currentTarget), 1, {backgroundColor: "#48B6DA"});
+    }
+
+    $('.home #titulosPaginas .title').click(function() {
+        window.location.href = 'http://www.coordinadora.com/category/noticias-y-actualidad/'; 
+    });
+
+
+    ////// COORDINADORA MOBILE
+
+    $('.slide-802, .slide-803').click(function() {
+        $('html, body').animate({
+            scrollTop: $('#bgCoodinadoraMobile').offset().top
+        }, 800);
+    });
+
+
+    // MATCH HEIGHT
+
+    $('.category .tm-content article').matchHeight();
+
+});
+
+
+jQuery(document).ready(function() {
+    jQuery(".tm-top-b .uk-width-1-1").owlCarousel({
+        autoPlay          : 5000,
+        navigation        : false,
+        pagination        : true,
+        items             : 5,
+        itemsDesktop      : [1199,4],
+        itemsDesktopSmall : [979,4],
+        navigationText    : ["",""]
+    });
+});
